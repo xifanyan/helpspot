@@ -1,31 +1,31 @@
 ---
-name: helpspot-ticket
-description: Create and view tickets in HelpSpot support system
+name: spark-ticket
+description: Create and view tickets in Spark (HelpSpot) support system
 license: MIT
 compatibility: opencode
 metadata:
   audience: support-staff
-  workflow: helpspot
+  workflow: spark
 ---
 
 ## What I do
 
-- Create new support tickets
-- View existing ticket details
+- Create new Spark support tickets
+- View existing Spark ticket details
 - Display ticket information in formatted tables
 - Handle customer information and categorization
 
 ## When to use me
 
 Use this skill when you need to:
-- Create a new support ticket
-- View details of an existing ticket
-- Check ticket status and assignment
-- Review ticket notes and history
+- Create a new Spark support ticket
+- View details of an existing Spark ticket
+- Check Spark ticket status and assignment
+- Review Spark ticket notes and history
 
 ## How I work
 
-I use the HelpSpot Python CLI with ticket commands:
+I use the Spark (HelpSpot) Python CLI with ticket commands:
 
 ### Create a ticket
 ```bash
@@ -54,14 +54,14 @@ uv run helpspot tickets get TICKET_ID
 ## Example usage
 
 Ask me:
-- "Create a ticket for john@example.com about password reset"
-- "Show me ticket #1234"
-- "Create an urgent ticket in category 5"
-- "Get details for ticket 5678"
+- "Create a Spark ticket for john@example.com about password reset"
+- "Show me Spark ticket #1234"
+- "Create an urgent Spark ticket in category 5"
+- "Get details for Spark ticket 5678"
 
 ## Requirements
 
-- HelpSpot URL must be configured (HELPSPOT_URL)
+- Spark URL must be configured (HELPSPOT_URL)
 - Creating tickets works with or without authentication
 - Viewing tickets requires authentication
 
@@ -69,4 +69,4 @@ Ask me:
 
 - When creating tickets, the system returns the new ticket ID
 - Ticket numbers are prefixed with 'x' in the API (xRequest)
-- Categories can be found using the helpspot-categories skill
+- Categories can be found using the spark-categories skill

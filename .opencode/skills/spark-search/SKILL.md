@@ -1,16 +1,16 @@
 ---
-name: helpspot-search
-description: Search for tickets in HelpSpot support system
+name: spark-search
+description: Search for tickets in Spark (HelpSpot) support system
 license: MIT
 compatibility: opencode
 metadata:
   audience: support-staff
-  workflow: helpspot
+  workflow: spark
 ---
 
 ## What I do
 
-- Search for support tickets using various criteria
+- Search for Spark support tickets using various criteria
 - Filter by email, status, category, or search query
 - Display results in a formatted table
 - Show ticket ID, title, customer, status, and urgency
@@ -18,14 +18,14 @@ metadata:
 ## When to use me
 
 Use this skill when you need to:
-- Find tickets for a specific customer email
+- Find Spark tickets for a specific customer email
 - Search tickets by keyword or phrase
 - Filter tickets by status or category
 - Find urgent or open tickets
 
 ## How I work
 
-I use the HelpSpot Python CLI with the search command:
+I use the Spark (HelpSpot) Python CLI with the search command:
 
 ```bash
 uv run helpspot tickets search [OPTIONS]
@@ -43,14 +43,14 @@ uv run helpspot tickets search [OPTIONS]
 ## Example usage
 
 Ask me:
-- "Search for tickets from user@example.com"
-- "Find all urgent tickets"
-- "Show open tickets in category 5"
-- "Search for tickets about 'password reset'"
+- "Search Spark for tickets from user@example.com"
+- "Find all urgent Spark tickets"
+- "Show open Spark tickets in category 5"
+- "Search Spark for tickets about 'password reset'"
 
 ## Requirements
 
-- HelpSpot URL must be configured (HELPSPOT_URL)
+- Spark URL must be configured (HELPSPOT_URL)
 - Authentication required (username/password or API token)
 - Search requires private API access
 
