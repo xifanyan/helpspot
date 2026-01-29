@@ -1,0 +1,32 @@
+{
+  "requests": {
+    "request": [
+      {
+        "xRequest": 12745,
+        "fOpenedVia": "Web Service",
+        "xOpenedViaId": 0,
+        "xPersonOpenedBy": "",
+        "xPersonAssignedTo": "Ian Landsman",
+        "fOpen": 1,
+        "xStatus": "Active",
+        "fUrgent": 0,
+        "xCategory": "Bugs",
+        "dtGMTOpened": 1190598240,
+        "dtGMTClosed": null,
+        "sRequestPassword": "itetxb",
+        "sTitle": "RE: Information on Your Request",
+        "sUserId": "12345",
+        "sFirstName": "John",
+        "sLastName": "Doe",
+        "sEmail": "john.doe@example.com",
+        "sPhone": "555-1234",
+        "iLastReplyBy": "Ian Landsman",
+        "fTrash": 0,
+        "dtGMTTrashed": null,
+        "fullname": "John Doe",
+        "tNote": "This is the initial request note.",
+        "accesskey": "12745itetxb"
+      }
+    ]
+  }
+}

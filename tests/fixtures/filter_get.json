@@ -1,0 +1,36 @@
+{
+  "filter": {
+    "xFilter": 42,
+    "sFilterName": "Urgent Bugs",
+    "sFilterView": "custom",
+    "tFilterDef": "{\"fUrgent\":\"1\",\"xCategory\":\"1\"}",
+    "request": [
+      {
+        "xRequest": 12746,
+        "fOpenedVia": "Email",
+        "xOpenedViaId": 1,
+        "xPersonOpenedBy": "",
+        "xPersonAssignedTo": "Support Agent",
+        "fOpen": 1,
+        "xStatus": "Active",
+        "fUrgent": 1,
+        "xCategory": "Bugs",
+        "dtGMTOpened": 1190598300,
+        "dtGMTClosed": null,
+        "sRequestPassword": "xyz789",
+        "sTitle": "Urgent Bug",
+        "sUserId": "67890",
+        "sFirstName": "Jane",
+        "sLastName": "Smith",
+        "sEmail": "jane.smith@example.com",
+        "sPhone": "555-5678",
+        "iLastReplyBy": "Support Agent",
+        "fTrash": 0,
+        "dtGMTTrashed": null,
+        "fullname": "Jane Smith",
+        "tNote": "Urgent bug report.",
+        "accesskey": "12746xyz789"
+      }
+    ]
+  }
+}

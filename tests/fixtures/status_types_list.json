@@ -1,0 +1,24 @@
+{
+  "results": {
+    "status": [
+      {
+        "xStatus": 1,
+        "sStatus": "Active",
+        "fOrder": 1,
+        "fDeleted": 0
+      },
+      {
+        "xStatus": 2,
+        "sStatus": "Waiting on Customer",
+        "fOrder": 2,
+        "fDeleted": 0
+      },
+      {
+        "xStatus": 3,
+        "sStatus": "Closed",
+        "fOrder": 3,
+        "fDeleted": 0
+      }
+    ]
+  }
+}

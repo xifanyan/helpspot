@@ -1,0 +1,18 @@
+{
+  "filters": {
+    "filter": [
+      {
+        "xFilter": 1,
+        "sFilterName": "My Open Requests",
+        "sFilterView": "myopen",
+        "tFilterDef": ""
+      },
+      {
+        "xFilter": 42,
+        "sFilterName": "Urgent Bugs",
+        "sFilterView": "custom",
+        "tFilterDef": "{\"fUrgent\":\"1\",\"xCategory\":\"1\"}"
+      }
+    ]
+  }
+}

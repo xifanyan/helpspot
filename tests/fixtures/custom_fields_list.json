@@ -1,0 +1,34 @@
+{
+  "customfields": {
+    "field": [
+      {
+        "fieldID": 1,
+        "fieldName": "Department",
+        "fieldType": "select",
+        "isRequired": 1,
+        "isPublic": 1,
+        "isCategorySpecific": 0,
+        "listItems": "Sales,Support,Engineering"
+      },
+      {
+        "fieldID": 2,
+        "fieldName": "Priority Level",
+        "fieldType": "select",
+        "isRequired": 0,
+        "isPublic": 0,
+        "isCategorySpecific": 1,
+        "sCategoryList": "1,2",
+        "listItems": "Low,Medium,High,Critical"
+      },
+      {
+        "fieldID": 3,
+        "fieldName": "Additional Notes",
+        "fieldType": "text",
+        "isRequired": 0,
+        "isPublic": 1,
+        "isCategorySpecific": 0,
+        "listItems": ""
+      }
+    ]
+  }
+}

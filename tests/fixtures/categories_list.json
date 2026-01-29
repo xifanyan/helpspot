@@ -1,0 +1,24 @@
+{
+  "categories": {
+    "category": [
+      {
+        "xCategory": 1,
+        "sCategory": "Bugs",
+        "sPersonalizedCatName": "Bug Reports",
+        "fDeleted": 0
+      },
+      {
+        "xCategory": 2,
+        "sCategory": "Support",
+        "sPersonalizedCatName": "Customer Support",
+        "fDeleted": 0
+      },
+      {
+        "xCategory": 3,
+        "sCategory": "Feature Requests",
+        "sPersonalizedCatName": "New Features",
+        "fDeleted": 0
+      }
+    ]
+  }
+}
