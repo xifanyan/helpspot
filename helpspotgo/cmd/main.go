@@ -744,6 +744,16 @@ func printTable(v any) error {
 		rv = rv.Elem()
 	}
 
+	if rv.Kind() == reflect.Slice && rv.Len() > 0 {
+		firstElem := rv.Index(0)
+		if firstElem.Kind() == reflect.Ptr {
+			firstElem = firstElem.Elem()
+		}
+		if firstElem.Type().Name() == "Request" && columns == "" {
+			columns = "XRequest,Title,Age"
+		}
+	}
+
 	switch rv.Kind() {
 	case reflect.Slice:
 		return printTableSlice(rv)

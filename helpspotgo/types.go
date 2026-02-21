@@ -1,5 +1,10 @@
 package helpspotgo
 
+import (
+	"fmt"
+	"time"
+)
+
 type VersionInfo struct {
 	Version    string `json:"version"`
 	MinVersion string `json:"min_version"`
@@ -75,6 +80,7 @@ type Request struct {
 	FullName         string `json:"fullname"`
 	Created          string `json:"dtGMTOpened"`
 	Updated          string `json:"dtGMTChange"`
+	Age              string `json:"-"`
 }
 
 type Category struct {
@@ -165,4 +171,30 @@ type Filter struct {
 	Query   string `json:"sQuery"`
 	Public  bool   `json:"fPublic"`
 	UserID  int    `json:"xUser"`
+}
+
+func (r *Request) CalculateAge() {
+	if r.Created == "" {
+		r.Age = ""
+		return
+	}
+	created, err := time.Parse("2006-01-02 15:04:05", r.Created)
+	if err != nil {
+		r.Age = ""
+		return
+	}
+	age := time.Since(created)
+	if age < time.Hour {
+		r.Age = fmt.Sprintf("%dm", int(age.Minutes()))
+	} else if age < 24*time.Hour {
+		r.Age = fmt.Sprintf("%.1fh", age.Hours())
+	} else {
+		r.Age = fmt.Sprintf("%.1fd", age.Hours()/24)
+	}
+}
+
+func CalculateRequestAges(requests []Request) {
+	for i := range requests {
+		requests[i].CalculateAge()
+	}
 }

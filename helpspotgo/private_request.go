@@ -68,6 +68,7 @@ func (c *Client) GetMultipleRequests(ctx context.Context, requestIDs []int) ([]R
 	if err != nil {
 		return nil, err
 	}
+	CalculateRequestAges(resp.Requests)
 	return resp.Requests, nil
 }
 
@@ -86,6 +87,7 @@ func (c *Client) SearchPrivateRequests(ctx context.Context, params map[string]st
 		return nil, fmt.Errorf("failed to parse requests: %w. Response: %s", err, truncated)
 	}
 
+	CalculateRequestAges(result.Requests)
 	return result.Requests, nil
 }
 

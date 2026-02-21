@@ -90,5 +90,6 @@ func (c *Client) GetCustomerRequests(ctx context.Context, email, password string
 	if err != nil {
 		return nil, err
 	}
+	CalculateRequestAges(resp.Requests)
 	return resp.Requests, nil
 }

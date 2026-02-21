@@ -37,6 +37,7 @@ func (c *Client) GetFilterStream(ctx context.Context, filterID int, params map[s
 	if err != nil {
 		return nil, err
 	}
+	CalculateRequestAges(resp.Requests)
 	return resp.Requests, nil
 }
 
