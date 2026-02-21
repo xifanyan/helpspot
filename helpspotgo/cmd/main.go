@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/helpspot/helpspotgo"
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/urfave/cli/v2"
 )
 
@@ -750,7 +751,7 @@ func printTable(v any) error {
 			firstElem = firstElem.Elem()
 		}
 		if firstElem.Type().Name() == "Request" && columns == "" {
-			columns = "XRequest,Title,Age"
+			columns = "XRequest,Title,Status,Created"
 		}
 	}
 
@@ -777,26 +778,25 @@ func printTableSlice(rv reflect.Value) error {
 
 	headers, rows := extractHeadersAndRows(rv, firstElem)
 
-	colWidths := make([]int, len(headers))
-	for i, h := range headers {
-		colWidths[i] = len(h)
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleRounded)
+
+	headerRow := table.Row{}
+	for _, h := range headers {
+		headerRow = append(headerRow, h)
 	}
+	t.AppendHeader(headerRow)
+
 	for _, row := range rows {
-		for i, cell := range row {
-			if len(cell) > colWidths[i] {
-				colWidths[i] = len(cell)
-			}
+		tRow := table.Row{}
+		for _, cell := range row {
+			tRow = append(tRow, cell)
 		}
+		t.AppendRow(tRow)
 	}
 
-	printSeparator(colWidths)
-	printRow(headers, colWidths)
-	printSeparator(colWidths)
-	for _, row := range rows {
-		printRow(row, colWidths)
-	}
-	printSeparator(colWidths)
-
+	t.Render()
 	return nil
 }
 
@@ -869,23 +869,6 @@ func extractHeadersAndRows(rv reflect.Value, firstElem reflect.Value) ([]string,
 	return headers, rows
 }
 
-func printSeparator(colWidths []int) {
-	fmt.Print("+")
-	for _, w := range colWidths {
-		fmt.Print(fmt.Sprintf("-%s-", strings.Repeat("-", w)))
-		fmt.Print("+")
-	}
-	fmt.Println()
-}
-
-func printRow(cells []string, colWidths []int) {
-	fmt.Print("|")
-	for i, cell := range cells {
-		fmt.Printf(" %s%s |", cell, strings.Repeat(" ", colWidths[i]-len(cell)))
-	}
-	fmt.Println()
-}
-
 func printTableMap(rv reflect.Value) error {
 	keys := rv.MapKeys()
 	if len(keys) == 0 {
@@ -893,93 +876,52 @@ func printTableMap(rv reflect.Value) error {
 		return nil
 	}
 
-	headers := []string{"Key", "Value"}
-	colWidths := []int{3, 5}
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleRounded)
+	t.AppendHeader(table.Row{"Key", "Value"})
 
-	var rows [][]string
 	for _, k := range keys {
 		key := fmt.Sprintf("%v", k.Interface())
 		val := fmt.Sprintf("%v", rv.MapIndex(k).Interface())
-		rows = append(rows, []string{key, val})
-		if len(key) > colWidths[0] {
-			colWidths[0] = len(key)
-		}
-		if len(val) > colWidths[1] {
-			colWidths[1] = len(val)
-		}
+		t.AppendRow(table.Row{key, val})
 	}
 
-	printSeparator(colWidths)
-	printRow(headers, colWidths)
-	printSeparator(colWidths)
-	for _, row := range rows {
-		printRow(row, colWidths)
-	}
-	printSeparator(colWidths)
-
+	t.Render()
 	return nil
 }
 
 func printTableSingle(v any) error {
-	headers := []string{"Field", "Value"}
-	colWidths := []int{5, 5}
-
 	rv := reflect.ValueOf(v)
 	if rv.Kind() == reflect.Ptr {
 		rv = rv.Elem()
 	}
 
-	var rows [][]string
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetStyle(table.StyleRounded)
 
 	if rv.Kind() == reflect.Struct {
-		t := rv.Type()
-		for i := 0; i < t.NumField(); i++ {
-			field := t.Field(i)
+		t.AppendHeader(table.Row{"Field", "Value"})
+		tv := rv.Type()
+		for i := 0; i < tv.NumField(); i++ {
+			field := tv.Field(i)
 			val := rv.Field(i).String()
-			rows = append(rows, []string{field.Name, val})
-			if len(field.Name) > colWidths[0] {
-				colWidths[0] = len(field.Name)
-			}
-			if len(val) > colWidths[1] {
-				colWidths[1] = len(val)
-			}
+			t.AppendRow(table.Row{field.Name, val})
 		}
 	} else if rv.Kind() == reflect.Map {
+		t.AppendHeader(table.Row{"Key", "Value"})
 		keys := rv.MapKeys()
 		for _, k := range keys {
 			key := fmt.Sprintf("%v", k.Interface())
 			val := fmt.Sprintf("%v", rv.MapIndex(k).Interface())
-			rows = append(rows, []string{key, val})
-			if len(key) > colWidths[0] {
-				colWidths[0] = len(key)
-			}
-			if len(val) > colWidths[1] {
-				colWidths[1] = len(val)
-			}
+			t.AppendRow(table.Row{key, val})
 		}
 	} else {
-		val := fmt.Sprintf("%v", v)
-		rows = append(rows, []string{"Value", val})
-		if len("Value") > colWidths[0] {
-			colWidths[0] = len("Value")
-		}
-		if len(val) > colWidths[1] {
-			colWidths[1] = len(val)
-		}
+		t.AppendHeader(table.Row{"Value"})
+		t.AppendRow(table.Row{fmt.Sprintf("%v", v)})
 	}
 
-	if len(rows) == 0 {
-		fmt.Println("No data")
-		return nil
-	}
-
-	printSeparator(colWidths)
-	printRow(headers, colWidths)
-	printSeparator(colWidths)
-	for _, row := range rows {
-		printRow(row, colWidths)
-	}
-	printSeparator(colWidths)
-
+	t.Render()
 	return nil
 }
