@@ -30,15 +30,7 @@
 
 **Target Users:** Developers integrating HelpSpot, Support teams using CLI
 
----
-
-## Package Choices by Language
-
-| Language | HTTP Client | CLI Framework | Config Location |
-|----------|-------------|---------------|-----------------|
-| Go | resty | urfave/cli | ~/.config/helpspot/config.json |
-| Python | httpx | click | ~/.config/helpspot/config.json |
-| Rust | reqwest | clap | ~/.config/helpspot/config.json |
+For language-specific implementation details, see [LANG.md](./LANG.md).
 
 ---
 
@@ -312,9 +304,9 @@ helpspot --debug request get-id 2166118
 
 ### Config Priority (highest to lowest)
 1. Command line flags
-2. Environment variables (`HELSPOT_BASE_URL`, `HELSPOT_USERNAME`, `HELSPOT_PASSWORD`, `HELSPOT_API_KEY`)
-3. Config file
-4. Default values
+2. Environment variables (`HELSPOT_BASE_URL`, `HELSPOT_USERNAME`, `HELSPOT_PASSWORD`, `HELSPOT_API_KEY`, `HELSPOT_OUTPUT`)
+3. Config file (`output` field)
+4. Default values (output: json)
 
 ### Environment Variables
 | Variable | Description |
@@ -418,7 +410,7 @@ helpspot --debug request get-id 2166118
 
 ### Phase 1: Foundation (Go: Complete)
 - [x] Config file handling (load/save)
-- [x] HTTP client with resty (basic, API key auth)
+- [x] HTTP client with authentication (basic, API key)
 - [x] Error handling (APIError, parseError)
 - [x] Data types (Request, Category, CustomField, KB, Forum)
 - [x] Go project structure setup
@@ -460,7 +452,15 @@ helpspot --debug request get-id 2166118
 - [x] forum list/topics/posts commands
 - [x] field-labels command
 - [x] version command
-- [x] Output formatting (json)
+- [x] Output formatting (json, table)
+
+### CLI Output Format Requirements (All Languages)
+- **json** (default): Machine-readable JSON output for automation and scripting
+- **table**: Human-readable table format for console users
+  - Must support displaying arrays/collections as formatted tables with headers
+  - Must support displaying single objects/maps as key-value pairs
+  - Must handle empty results gracefully ("No data" message)
+  - Table format should use ASCII characters for compatibility (no special dependencies required)
 
 ---
 
@@ -469,37 +469,13 @@ helpspot --debug request get-id 2166118
 ```
 helpspot/
 ├── SPEC.md                      # This file
+├── LANG.md                      # Language-specific implementation details
 ├── helpspotgo/                  # Go implementation (complete)
-│   ├── client.go               # HTTP client (resty)
-│   ├── config.go               # Config file handling
-│   ├── errors.go               # Error types
-│   ├── types.go                # Data models
-│   ├── request.go              # Public request methods
-│   ├── private_request.go      # Private request methods
-│   ├── kb.go                   # Knowledge base methods
-│   ├── forum.go                # Forum methods
-│   ├── private_filter.go       # Filter/user methods
-│   ├── util.go                 # Utility methods
-│   ├── cmd/
-│   │   └── main.go             # CLI application
-│   ├── helpspot.exe            # CLI binary
-│   ├── go.mod
-│   └── go.sum
 ├── helpspotpy/                  # Python implementation (planned)
-│   ├── client.py
-│   ├── config.py
-│   ├── models.py
-│   ├── api/
-│   ├── cli/
-│   └── pyproject.toml
-├── helpspotrs/                # Rust implementation (planned)
-│   ├── src/
-│   │   ├── client.rs
-│   │   ├── config.rs
-│   │   ├── types.rs
-│   │   └── cli/
-│   └── Cargo.toml
-└── spec/                     # Shared specification (future)
-    ├── api.yaml              # OpenAPI-like spec
-    └── types.json            # Shared type definitions
+├── helpspotrs/                  # Rust implementation (planned)
+└── spec/                        # Shared specification (future)
+    ├── api.yaml                 # OpenAPI-like spec
+    └── types.json               # Shared type definitions
 ```
+
+See [LANG.md](./LANG.md) for detailed per-language project structures.

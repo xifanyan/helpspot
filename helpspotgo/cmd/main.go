@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
+	"strings"
 
 	"github.com/helpspot/helpspotgo"
 	"github.com/urfave/cli/v2"
@@ -17,6 +19,8 @@ var (
 	password  string
 	apiKey    string
 	output    string
+	columns   string
+	apiOutput string
 	debug     bool
 	configDir string
 )
@@ -70,6 +74,11 @@ func globalFlags() []cli.Flag {
 			Value:       "json",
 			Destination: &output,
 		},
+		&cli.StringFlag{
+			Name:        "columns",
+			Usage:       "Columns to display in table output (comma-separated)",
+			Destination: &columns,
+		},
 		&cli.BoolFlag{
 			Name:        "debug",
 			Usage:       "Enable debug mode",
@@ -100,15 +109,21 @@ func loadConfig(c *cli.Context) error {
 			if apiKey == "" && cfg.APIKey != "" {
 				apiKey = cfg.APIKey
 			}
+			if output == "" && cfg.Output != "" {
+				output = cfg.Output
+			}
 		}
 	}
 	return nil
 }
 
 func getClient() (*helpspotgo.Client, error) {
+	if apiOutput == "" {
+		apiOutput = "json"
+	}
 	opts := []helpspotgo.Option{
 		helpspotgo.WithBaseURL(baseURL),
-		helpspotgo.WithOutput(output),
+		helpspotgo.WithOutput(apiOutput),
 		helpspotgo.WithDebug(debug),
 	}
 
@@ -710,10 +725,251 @@ func printOutput(v any) error {
 		return nil
 	}
 
+	if output == "table" {
+		return printTable(v)
+	}
+
 	data, err := json.Marshal(v)
 	if err != nil {
 		return err
 	}
 	fmt.Println(string(data))
+	return nil
+}
+
+func printTable(v any) error {
+	rv := reflect.ValueOf(v)
+
+	if rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+
+	switch rv.Kind() {
+	case reflect.Slice:
+		return printTableSlice(rv)
+	case reflect.Map:
+		return printTableMap(rv)
+	default:
+		return printTableSingle(v)
+	}
+}
+
+func printTableSlice(rv reflect.Value) error {
+	if rv.Len() == 0 {
+		fmt.Println("No data")
+		return nil
+	}
+
+	firstElem := rv.Index(0)
+	if firstElem.Kind() == reflect.Ptr {
+		firstElem = firstElem.Elem()
+	}
+
+	headers, rows := extractHeadersAndRows(rv, firstElem)
+
+	colWidths := make([]int, len(headers))
+	for i, h := range headers {
+		colWidths[i] = len(h)
+	}
+	for _, row := range rows {
+		for i, cell := range row {
+			if len(cell) > colWidths[i] {
+				colWidths[i] = len(cell)
+			}
+		}
+	}
+
+	printSeparator(colWidths)
+	printRow(headers, colWidths)
+	printSeparator(colWidths)
+	for _, row := range rows {
+		printRow(row, colWidths)
+	}
+	printSeparator(colWidths)
+
+	return nil
+}
+
+func extractHeadersAndRows(rv reflect.Value, firstElem reflect.Value) ([]string, [][]string) {
+	var headers []string
+	var rows [][]string
+
+	var columnFilter map[string]bool
+	if columns != "" {
+		columnFilter = make(map[string]bool)
+		for _, col := range strings.Split(columns, ",") {
+			columnFilter[strings.TrimSpace(col)] = true
+		}
+	}
+
+	if firstElem.Kind() == reflect.Struct {
+		t := firstElem.Type()
+		var fieldIndices []int
+		for i := 0; i < t.NumField(); i++ {
+			field := t.Field(i)
+			if columnFilter == nil || columnFilter[field.Name] {
+				headers = append(headers, field.Name)
+				fieldIndices = append(fieldIndices, i)
+			}
+		}
+
+		for i := 0; i < rv.Len(); i++ {
+			elem := rv.Index(i)
+			if elem.Kind() == reflect.Ptr {
+				elem = elem.Elem()
+			}
+			var row []string
+			for _, idx := range fieldIndices {
+				val := elem.Field(idx).String()
+				row = append(row, val)
+			}
+			rows = append(rows, row)
+		}
+	} else if firstElem.Kind() == reflect.Map {
+		for i := 0; i < rv.Len(); i++ {
+			elem := rv.Index(i)
+			if elem.Kind() == reflect.Ptr {
+				elem = elem.Elem()
+			}
+			if elem.Kind() == reflect.Map {
+				keys := elem.MapKeys()
+				if len(headers) == 0 {
+					for _, k := range keys {
+						key := fmt.Sprintf("%v", k.Interface())
+						if columnFilter == nil || columnFilter[key] {
+							headers = append(headers, key)
+						}
+					}
+				}
+				var row []string
+				for _, h := range headers {
+					for _, k := range keys {
+						if fmt.Sprintf("%v", k.Interface()) == h {
+							val := elem.MapIndex(k)
+							row = append(row, fmt.Sprintf("%v", val.Interface()))
+							break
+						}
+					}
+				}
+				rows = append(rows, row)
+			}
+		}
+	}
+
+	return headers, rows
+}
+
+func printSeparator(colWidths []int) {
+	fmt.Print("+")
+	for _, w := range colWidths {
+		fmt.Print(fmt.Sprintf("-%s-", strings.Repeat("-", w)))
+		fmt.Print("+")
+	}
+	fmt.Println()
+}
+
+func printRow(cells []string, colWidths []int) {
+	fmt.Print("|")
+	for i, cell := range cells {
+		fmt.Printf(" %s%s |", cell, strings.Repeat(" ", colWidths[i]-len(cell)))
+	}
+	fmt.Println()
+}
+
+func printTableMap(rv reflect.Value) error {
+	keys := rv.MapKeys()
+	if len(keys) == 0 {
+		fmt.Println("No data")
+		return nil
+	}
+
+	headers := []string{"Key", "Value"}
+	colWidths := []int{3, 5}
+
+	var rows [][]string
+	for _, k := range keys {
+		key := fmt.Sprintf("%v", k.Interface())
+		val := fmt.Sprintf("%v", rv.MapIndex(k).Interface())
+		rows = append(rows, []string{key, val})
+		if len(key) > colWidths[0] {
+			colWidths[0] = len(key)
+		}
+		if len(val) > colWidths[1] {
+			colWidths[1] = len(val)
+		}
+	}
+
+	printSeparator(colWidths)
+	printRow(headers, colWidths)
+	printSeparator(colWidths)
+	for _, row := range rows {
+		printRow(row, colWidths)
+	}
+	printSeparator(colWidths)
+
+	return nil
+}
+
+func printTableSingle(v any) error {
+	headers := []string{"Field", "Value"}
+	colWidths := []int{5, 5}
+
+	rv := reflect.ValueOf(v)
+	if rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+
+	var rows [][]string
+
+	if rv.Kind() == reflect.Struct {
+		t := rv.Type()
+		for i := 0; i < t.NumField(); i++ {
+			field := t.Field(i)
+			val := rv.Field(i).String()
+			rows = append(rows, []string{field.Name, val})
+			if len(field.Name) > colWidths[0] {
+				colWidths[0] = len(field.Name)
+			}
+			if len(val) > colWidths[1] {
+				colWidths[1] = len(val)
+			}
+		}
+	} else if rv.Kind() == reflect.Map {
+		keys := rv.MapKeys()
+		for _, k := range keys {
+			key := fmt.Sprintf("%v", k.Interface())
+			val := fmt.Sprintf("%v", rv.MapIndex(k).Interface())
+			rows = append(rows, []string{key, val})
+			if len(key) > colWidths[0] {
+				colWidths[0] = len(key)
+			}
+			if len(val) > colWidths[1] {
+				colWidths[1] = len(val)
+			}
+		}
+	} else {
+		val := fmt.Sprintf("%v", v)
+		rows = append(rows, []string{"Value", val})
+		if len("Value") > colWidths[0] {
+			colWidths[0] = len("Value")
+		}
+		if len(val) > colWidths[1] {
+			colWidths[1] = len(val)
+		}
+	}
+
+	if len(rows) == 0 {
+		fmt.Println("No data")
+		return nil
+	}
+
+	printSeparator(colWidths)
+	printRow(headers, colWidths)
+	printSeparator(colWidths)
+	for _, row := range rows {
+		printRow(row, colWidths)
+	}
+	printSeparator(colWidths)
+
 	return nil
 }

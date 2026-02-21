@@ -79,7 +79,11 @@ func (c *Client) SearchPrivateRequests(ctx context.Context, params map[string]st
 
 	var result RequestsResponse
 	if err := json.Unmarshal([]byte(data), &result); err != nil {
-		return nil, fmt.Errorf("failed to parse requests: %w", err)
+		truncated := data
+		if len(truncated) > 200 {
+			truncated = truncated[:200] + "..."
+		}
+		return nil, fmt.Errorf("failed to parse requests: %w. Response: %s", err, truncated)
 	}
 
 	return result.Requests, nil
