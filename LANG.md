@@ -75,3 +75,7 @@ helpspotrs/
 │   └── cli/
 └── Cargo.toml
 ```
+
+## Build Rules
+
+- **Go:** Always use `-ldflags="-s -w"` to optimize the binary (strip symbols and debugging info)
