@@ -122,6 +122,9 @@ func getClient() (*helpspotgo.Client, error) {
 	if apiOutput == "" {
 		apiOutput = "json"
 	}
+	if debug {
+		helpspotgo.SetDebug(true)
+	}
 	opts := []helpspotgo.Option{
 		helpspotgo.WithBaseURL(baseURL),
 		helpspotgo.WithOutput(apiOutput),
@@ -225,7 +228,8 @@ func requestCommands() *cli.Command {
 				Flags: []cli.Flag{
 					&cli.StringFlag{Name: "filter", Aliases: []string{"f"}, Usage: "Filter ID"},
 					&cli.StringFlag{Name: "search", Aliases: []string{"s"}, Usage: "Search text"},
-					&cli.IntFlag{Name: "limit", Usage: "Limit results"},
+					&cli.IntFlag{Name: "limit", Usage: "Limit results", Value: 10},
+					&cli.IntFlag{Name: "offset", Usage: "Offset results", Value: 0},
 				},
 				Action: runRequestList,
 			},
@@ -515,13 +519,20 @@ func runRequestList(c *cli.Context) error {
 		params["sSearch"] = search
 	}
 	if limit := c.Int("limit"); limit > 0 {
-		params["limit"] = fmt.Sprint(limit)
+		params["num"] = fmt.Sprint(limit)
+	}
+	if offset := c.Int("offset"); offset > 0 {
+		params["start"] = fmt.Sprint(offset)
 	}
 
 	ctx := context.Background()
 	requests, err := client.SearchPrivateRequests(ctx, params)
 	if err != nil {
 		return err
+	}
+
+	if limit := c.Int("limit"); limit > 0 && len(requests) > limit {
+		requests = requests[:limit]
 	}
 
 	return printOutput(requests)

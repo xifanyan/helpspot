@@ -159,6 +159,11 @@ func (c *Client) isPostMethod(method string) bool {
 func (c *Client) Do(ctx context.Context, method string, params map[string]string) (*Response, error) {
 	url := c.buildURL(method)
 
+	LogDebug("API Request: %s %s", method, url)
+	if len(params) > 0 {
+		LogDebug("Params: %v", params)
+	}
+
 	var resp *resty.Response
 	var err error
 
@@ -183,10 +188,12 @@ func (c *Client) Do(ctx context.Context, method string, params map[string]string
 	}
 
 	if err != nil {
+		LogError("API Request failed: %v", err)
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
 
 	if resp.StatusCode() >= 400 {
+		LogWarn("API returned status %d: %s", resp.StatusCode(), string(resp.Body()))
 		return nil, c.parseError(resp.Body(), resp.StatusCode())
 	}
 

@@ -87,6 +87,12 @@ func (c *Client) SearchPrivateRequests(ctx context.Context, params map[string]st
 		return nil, fmt.Errorf("failed to parse requests: %w. Response: %s", err, truncated)
 	}
 
+	for i := range result.Requests {
+		if result.Requests[i].XStatus != "" {
+			result.Requests[i].Status = result.Requests[i].XStatus
+		}
+	}
+
 	CalculateRequestAges(result.Requests)
 	return result.Requests, nil
 }

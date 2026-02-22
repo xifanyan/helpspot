@@ -30,7 +30,7 @@
 
 **Target Users:** Developers integrating HelpSpot, Support teams using CLI
 
-For language-specific implementation details, see [LANG.md](./LANG.md).
+For language-specific implementation details, see [LANG_GO.md](./LANG_GO.md), [LANG_PYTHON.md](./LANG_PYTHON.md), or [LANG_RUST.md](./LANG_RUST.md).
 
 ---
 
@@ -469,7 +469,9 @@ helpspot --debug request get-id 2166118
 ```
 helpspot/
 ├── SPEC.md                      # This file
-├── LANG.md                      # Language-specific implementation details
+├── LANG_GO.md                   # Go implementation details
+├── LANG_PYTHON.md               # Python implementation details
+├── LANG_RUST.md                 # Rust implementation details
 ├── helpspotgo/                  # Go implementation (complete)
 ├── helpspotpy/                  # Python implementation (planned)
 ├── helpspotrs/                  # Rust implementation (planned)
@@ -478,4 +480,4 @@ helpspot/
     └── types.json               # Shared type definitions
 ```
 
-See [LANG.md](./LANG.md) for detailed per-language project structures.
+See [LANG_GO.md](./LANG_GO.md), [LANG_PYTHON.md](./LANG_PYTHON.md), [LANG_RUST.md](./LANG_RUST.md) for detailed per-language project structures.
