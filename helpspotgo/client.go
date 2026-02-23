@@ -90,6 +90,7 @@ func NewClient(opts ...Option) (*Client, error) {
 	client.SetTimeout(cfg.Timeout)
 	client.SetDebug(cfg.Debug)
 	client.SetHeader("Content-Type", "application/x-www-form-urlencoded")
+	client.SetHeader("Accept", "application/json")
 
 	if cfg.APIKey != "" {
 		client.SetHeader("Authorization", "Bearer "+cfg.APIKey)
@@ -170,6 +171,7 @@ func (c *Client) Do(ctx context.Context, method string, params map[string]string
 	if c.isPostMethod(method) {
 		allParams := make(map[string]string)
 		allParams["method"] = method
+		allParams["output"] = "json"
 		for k, v := range params {
 			allParams[k] = v
 		}
@@ -178,12 +180,14 @@ func (c *Client) Do(ctx context.Context, method string, params map[string]string
 			SetFormData(allParams).
 			Post(url)
 	} else if len(params) > 0 {
+		params["output"] = "json"
 		resp, err = c.client.R().
 			SetContext(ctx).
 			SetQueryParams(params).
 			Get(url)
 	} else {
 		resp, err = c.client.R().
+			SetQueryParams(map[string]string{"method": method, "output": "json"}).
 			Get(url)
 	}
 
@@ -216,16 +220,20 @@ func (c *Client) DoRaw(ctx context.Context, method string, params map[string]str
 
 	// Use GET for private request get and search, POST for other private methods
 	if method == "private.request.get" || method == "private.request.search" {
+		params["output"] = "json"
 		resp, err = c.client.R().
 			SetContext(ctx).
 			SetQueryParams(params).
 			Get(url)
 	} else if c.isPostMethod(method) {
+		params["method"] = method
+		params["output"] = "json"
 		resp, err = c.client.R().
 			SetContext(ctx).
 			SetFormData(params).
 			Post(url)
 	} else {
+		params["output"] = "json"
 		resp, err = c.client.R().
 			SetContext(ctx).
 			SetQueryParams(params).

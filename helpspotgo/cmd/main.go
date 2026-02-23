@@ -21,7 +21,6 @@ var (
 	apiKey    string
 	output    string
 	columns   string
-	apiOutput string
 	debug     bool
 	configDir string
 )
@@ -119,15 +118,15 @@ func loadConfig(c *cli.Context) error {
 }
 
 func getClient() (*helpspotgo.Client, error) {
-	if apiOutput == "" {
-		apiOutput = "json"
+	if output == "" {
+		output = "json"
 	}
 	if debug {
 		helpspotgo.SetDebug(true)
 	}
 	opts := []helpspotgo.Option{
 		helpspotgo.WithBaseURL(baseURL),
-		helpspotgo.WithOutput(apiOutput),
+		helpspotgo.WithOutput(output),
 		helpspotgo.WithDebug(debug),
 	}
 
